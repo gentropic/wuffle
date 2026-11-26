@@ -1,0 +1,14 @@
+{
+  "name": "wuffle",
+  "short_name": "wuffle",
+  "description": "A stereonet workbench and a geological compass — one file. Measure on the phone, analyse on the desk. Offline.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#161616",
+  "theme_color": "#161616",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "launch_handler": { "client_mode": "navigate-new" }
+}
