@@ -15,11 +15,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  publish:
+  # BUILD uploads the site; DEPLOY (its own job) publishes it — GitHub's documented pattern, as
+  # micro's. One job doing both asked for the artifact a moment after uploading it and often found
+  # none ("No artifacts named github-pages").
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -33,9 +33,18 @@ jobs:
           mkdir -p _site
           cp index.html manifest.webmanifest sw.js icon.svg .nojekyll _site/
 
-      - uses: actions/upload-pages-artifact@v3
+      # v4+ leaves hidden files out unless asked, so .nojekyll is asked for.
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
+          include-hidden-files: true
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
       - id: deploy
         uses: actions/deploy-pages@v4
