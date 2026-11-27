@@ -28,7 +28,26 @@ function findWuffle() {
 const PWA_INJECT = '<!--wuffle-pwa-->'
   + '<link rel="manifest" href="manifest.webmanifest">\n'
   + '<meta name="theme-color" content="#161616">\n'
-  + '<script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>'
+  // the service worker + the @gcu/sw update protocol: the SW serves the cached page at once and refetches it
+  // behind; when the bytes changed it says so, and this toast offers the reload (without it, a reload served
+  // the old copy and the NEXT one the new, silently). Talks to the SW by postMessage only; inert on a
+  // downloaded file:// copy (no SW there). Same toast as micro's.
+  + '<script>(function(){'
+  + 'if(!("serviceWorker" in navigator))return;'
+  + 'var sw=navigator.serviceWorker,shown=false;'
+  + 'addEventListener("load",function(){sw.register("sw.js").catch(function(){});});'
+  + 'function apply(){try{sw.controller&&sw.controller.postMessage({type:"gcu-sw:apply-update"});}catch(e){}}'
+  + 'function toast(){'
+  + 'if(shown||!document.body)return;shown=true;'
+  + 'var t=document.createElement("div");t.setAttribute("role","status");'
+  + 't.style.cssText="position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:2147483647;display:flex;gap:12px;align-items:center;background:#1c1c1c;color:#e8e8e8;border:1px solid #3a3a3a;border-radius:8px;padding:10px 14px;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;box-shadow:0 4px 20px rgba(0,0,0,.5);max-width:calc(100vw - 32px)";'
+  + 'var s=document.createElement("span");s.textContent="A new version of wuffle is available.";'
+  + 'var b=document.createElement("button");b.textContent="Reload";b.style.cssText="background:#c8781e;color:#fff;border:0;border-radius:5px;padding:5px 12px;font:inherit;cursor:pointer";b.onclick=apply;'
+  + 'var x=document.createElement("button");x.textContent="×";x.setAttribute("aria-label","dismiss");x.style.cssText="background:transparent;color:#999;border:0;font:inherit;cursor:pointer;font-size:16px;line-height:1";x.onclick=function(){t.remove();shown=false;};'
+  + 't.appendChild(s);t.appendChild(b);t.appendChild(x);document.body.appendChild(t);'
+  + '}'
+  + 'sw.addEventListener("message",function(e){var d=e.data||{};if(d.type==="gcu-sw:reload"){location.reload();}else if(d.type==="gcu-sw:update-available"){toast();}});'
+  + '})();</script>'
   + '<!--/wuffle-pwa-->\n';
 
 const injectPwa = (html) => (/<!--wuffle-pwa-->/.test(html) ? html : html.replace(/<\/head>/i, PWA_INJECT + '</head>'));
