@@ -33,6 +33,20 @@ jobs:
           mkdir -p _site
           cp index.html manifest.webmanifest sw.js icon.svg .nojekyll _site/
 
+      # The manual (the LuaLaTeX book, ~6 MB) is built on Arthur's machine and attached to an auditable
+      # release by hand, so it rides in from the newest release that carries one — never committed here
+      # (6 MB per rebuild would pile up in this repo's history). wuffle's Help → "The manual" links to it.
+      - name: Fetch the wuffle manual (PDF)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for tag in $(gh release list --repo gentropic/auditable --limit 20 --json tagName -q '.[].tagName'); do
+            if gh release download "$tag" --repo gentropic/auditable --pattern 'wuffle-manual.pdf' --dir _site --clobber 2>/dev/null; then
+              echo "wuffle-manual.pdf from $tag"; break
+            fi
+          done
+          [ -f _site/wuffle-manual.pdf ] || echo "::warning::no auditable release carries wuffle-manual.pdf — Help → The manual will 404"
+
       # v4+ leaves hidden files out unless asked, so .nojekyll is asked for.
       - uses: actions/upload-pages-artifact@v5
         with:
