@@ -538,6 +538,19 @@ addEventListener('blur', () => { hostDown = false; hideHint(); for (const m of m
 
 // ---------------------------------------------------------------- the menus
 const activePc = () => focusedMachine() || machines.get(+(focused?.startsWith('pc:') ? focused.slice(3) : NaN)) || [...machines.values()].find((m) => layout.panes().includes('pc:' + m.id)) || [...machines.values()][0] || null;
+const ABOUT = `StarStereo 93 — stereographic projection for structural geology.
+
+It comes in two editions. This is the DOS edition, the Professional DOS Engine 3.0: for speed, on any PC with a VGA card — equal-area and equal-angle nets, great circles, Kamb and 1% contours, eigenvectors and the beta axis, all in integer arithmetic, no maths coprocessor needed. Its sibling is StarStereo 93 for Windows: a 32-bit program for Windows 3.1, by way of Win32s.
+
+Before it, StarStereo 1.x and 2.x, for DOS. After it, a long way after, wuffle.
+
+This page runs the DOS edition in DOSBox (js-dos's emulators, GPL-2.0). Nothing leaves your browser.`;
+const look = () => document.documentElement.dataset.look || '1993';
+function setLook(v) {
+  document.documentElement.dataset.look = v;
+  try { localStorage.setItem('starstereo-93.look', v); } catch { /* a private window: this visit only */ }
+  for (const m of machines.values()) m.fit();
+}
 const HOST_KEYS = [['Right Ctrl', 'the host key: held, the keys below are the page\'s, not DOS\'s'], ['Right Ctrl + 1 … 9', 'the pane with that number (shown while it is held)'],
   ['Right Ctrl + ← / →', 'the next pane / the one before'], ['Right Ctrl + M', 'the page\'s menus'], ['Right Ctrl + N', 'a new PC'], ['Right Ctrl + F', 'full screen (the PC)'],
   ['click a screen', 'that PC has the keys (an orange frame)'], ['in the drives', '↑ ↓ choose, Enter edit, Del delete, Shift+F10 the menu'], ['in an editor', 'Ctrl+S saves onto the drive'],
@@ -569,6 +582,7 @@ const bar = new MenuBar($('menus'), () => [
     { label: 'The drives', action: 'show:drives' },
     '---',
     { label: 'Full screen (the PC)', action: 'full', shortcut: 'RCtrl+F', disabled: !machines.size },
+    { label: 'Look', children: [['1993', '1993'], ['gcu', 'GCU (today)']].map(([v, n]) => ({ label: (look() === v ? '● ' : '   ') + n, action: 'look:' + v })) },
     { label: 'Reset the layout', action: 'resetlayout' },
   ] },
   { label: 'Help', items: () => [
@@ -583,6 +597,7 @@ bar.on('action', async (a) => {
   const m = activePc();
   if (a.startsWith('show:')) return layout.show(a.slice(5));
   if (a.startsWith('cpu:')) return m?.setCpu(a.slice(4));
+  if (a.startsWith('look:')) { setLook(a.slice(5)); return; }
   switch (a) {
     case 'newpc': return newMachine();
     case 'insertE': return pick(null, 'E');
@@ -614,7 +629,7 @@ bar.on('action', async (a) => {
     case 'resetlayout': layout.reset(); return;
     case 'keys': return helpKeys();
     case 'readme': return editors.edit(where([...machines.values()][0] || null, 'C', 'README.TXT'));
-    case 'about': return alert('StarStereo 93 — Professional DOS Engine 3.0.\n\nStereographic projection for structural geology on any PC with a VGA card: equal-area and equal-angle nets, great circles, Kamb and 1% contours, eigenvectors and the beta axis — all in integer arithmetic, no maths coprocessor needed.\n\nStarStereo 1.x and 2.x were DOS programs; StarStereo 93 was the last of them, and the first for Windows came after. wuffle is what it became.\n\nThis page runs it in DOSBox (js-dos\'s emulators, GPL-2.0). Nothing leaves your browser.', { title: 'About StarStereo 93' });
+    case 'about': return alert(ABOUT, { title: 'About StarStereo 93' });
     case 'wuffle': window.open('../', '_blank'); return;
   }
 });

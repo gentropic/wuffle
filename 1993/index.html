@@ -120,7 +120,113 @@
   .help-table { font:12px var(--w-mono); border-collapse:collapse; }
   .help-table td { padding:2px 12px 2px 0; vertical-align:top; }
   .help-table td:first-child { color:var(--w-orange); white-space:nowrap; }
+
+  /* ================================================================ THE 1993 LOOK (the default; View › Look)
+     A 16-colour desktop of the day, drawn in CSS: raised grey bevels, navy for what is active, white work
+     areas, a title bar over the menu bar. Fonts are only named as a preference — whoever has the bitmap
+     system fonts installed sees them, everyone else a plain sans and a plain mono. */
+  html[data-look="1993"] {
+    --k-face:#C0C0C0; --k-hi:#FFFFFF; --k-lo:#808080; --k-dk:#000000; --k-navy:#000080; --k-teal:#008080; --k-win:#FFFFFF;
+    --k-sans:"MS Sans Serif","Microsoft Sans Serif",Arial,Helvetica,sans-serif; --k-mono:Fixedsys,Terminal,"Lucida Console",Consolas,monospace;
+    --raised: inset -1px -1px var(--k-dk), inset 1px 1px var(--k-hi), inset -2px -2px var(--k-lo), inset 2px 2px var(--k-face);
+    --sunken: inset 1px 1px var(--k-lo), inset -1px -1px var(--k-hi), inset 2px 2px var(--k-dk), inset -2px -2px var(--k-face);
+    color-scheme: light;
+  }
+  html[data-look="1993"] body {
+    --rails-bg:var(--k-teal); --rails-surface:var(--k-win); --rails-chrome:var(--k-face); --rails-border:var(--k-dk); --rails-border-strong:var(--k-dk);
+    --rails-text:#000; --rails-text-dim:#000; --rails-text-faint:var(--k-lo); --rails-accent:var(--k-navy); --rails-accent-bg:rgba(0,0,128,.25); --rails-font-mono:var(--k-sans);
+    --ui-bg:var(--k-win); --ui-bg-raised:var(--k-face); --ui-bg-hover:var(--k-navy); --ui-bg-selected:var(--k-navy); --ui-fg:#000; --ui-fg-muted:var(--k-lo);
+    --ui-fg-accent:var(--k-navy); --ui-border:var(--k-dk); --ui-border-focus:var(--k-dk); --ui-font:var(--k-sans); --ui-font-size:12px; --ui-border-radius:0; --ui-shadow:none;
+    background:var(--k-teal); color:#000; font:12px var(--k-sans);
+  }
+  html[data-look="1993"] #wb { grid-template-rows:auto 1fr auto; }
+  /* the title bar, then the menu bar */
+  html[data-look="1993"] .bar { display:grid; grid-template-columns:1fr auto; align-items:center; padding:0; gap:0; background:var(--k-win); border-bottom:1px solid var(--k-dk); }
+  html[data-look="1993"] .brand { grid-column:1 / -1; margin:0; height:20px; line-height:20px; text-align:center; background:var(--k-navy); color:#fff; font:bold 12px var(--k-sans); border-bottom:1px solid var(--k-dk); }
+  html[data-look="1993"] .brand small { color:#fff; font-weight:bold; }
+  html[data-look="1993"] #menus { height:20px; }
+  html[data-look="1993"] .gcu-menubar-trigger { color:#000; font:12px var(--k-sans); padding:0 7px; height:20px; border-radius:0; }
+  html[data-look="1993"] .gcu-menubar-trigger:hover, html[data-look="1993"] .gcu-menubar-trigger.gcu-menubar-focused,
+  html[data-look="1993"] .gcu-menubar-trigger.gcu-menubar-active { background:var(--k-navy); color:#fff; }
+  html[data-look="1993"] .chip { margin-right:6px; border:0; color:var(--k-lo); font:11px var(--k-sans); }
+  /* pull-downs: white, a black line round them, navy for the item under the cursor */
+  html[data-look="1993"] .gcu-menu { background:var(--k-win); border:1px solid var(--k-dk); border-radius:0; box-shadow:2px 2px 0 var(--k-dk); padding:1px 0; font:12px var(--k-sans); color:#000; }
+  html[data-look="1993"] .gcu-menu-item { border-radius:0; color:#000; }
+  html[data-look="1993"] .gcu-menu-item.gcu-menu-active { background:var(--k-navy); color:#fff; }
+  html[data-look="1993"] .gcu-menu-item.gcu-menu-active .gcu-menu-shortcut, html[data-look="1993"] .gcu-menu-item.gcu-menu-active .gcu-menu-arrow { color:#fff; }
+  html[data-look="1993"] .gcu-menu-disabled { color:var(--k-lo) !important; }
+  html[data-look="1993"] .gcu-menu-danger { color:#000; }
+  html[data-look="1993"] .gcu-menu-sep { background:var(--k-dk); height:1px; margin:3px 0; }
+  /* the panes: each stack a window — its tabs the title bar (the one in front navy), a black frame round it */
+  html[data-look="1993"] .rails-root { font:12px var(--k-sans); }
+  html[data-look="1993"] .rails-stack { box-shadow:inset 0 0 0 1px var(--k-dk), inset 0 0 0 4px var(--k-face); }
+  html[data-look="1993"] .rails-strip { background:var(--k-face); border-bottom:1px solid var(--k-dk); }
+  html[data-look="1993"] .rails-tab { color:#000; border-right:1px solid var(--k-lo); font:bold 12px var(--k-sans); padding:3px 8px 3px 10px; }
+  html[data-look="1993"] .rails-tab:hover { color:#000; }
+  html[data-look="1993"] .rails-tab.rails-active { background:var(--k-navy); color:#fff; box-shadow:none; }
+  html[data-look="1993"] .rails-tab .rails-x, html[data-look="1993"] .rails-btn-close { color:inherit; }
+  html[data-look="1993"] .rails-bar:hover { background:var(--k-navy); }
+  html[data-look="1993"] .rails-bar-row { border-left:1px solid var(--k-dk); }
+  html[data-look="1993"] .rails-bar-col { border-top:1px solid var(--k-dk); }
+  html[data-look="1993"] .rails-float { border:1px solid var(--k-dk); border-radius:0; box-shadow:var(--raised), 3px 3px 0 rgba(0,0,0,.6); background:var(--k-face); }
+  html[data-look="1993"] .rails-titlebar { background:var(--k-navy); border-bottom:1px solid var(--k-dk); }
+  html[data-look="1993"] .rails-titlebar-label { color:#fff; font:bold 12px var(--k-sans); letter-spacing:0; }
+  html[data-look="1993"] .rails-titlebar-buttons button { background:var(--k-face); color:#000; border-radius:0; box-shadow:var(--raised); }
+  /* the drives: a file manager's tree — white, black text, navy selection */
+  html[data-look="1993"] .drives { background:var(--k-win); color:#000; font:12px var(--k-sans); }
+  html[data-look="1993"] .drives .grp { color:#000; font:bold 11px var(--k-sans); text-transform:none; letter-spacing:0; }
+  html[data-look="1993"] .drives .grp .dot { border:1px solid var(--k-dk); border-radius:0; width:8px; height:8px; background:var(--k-face); }
+  html[data-look="1993"] .drives .grp .dot.on { background:#00FF00; }
+  html[data-look="1993"] .drives .row.drive, html[data-look="1993"] .drives .row.file { color:#000; }
+  html[data-look="1993"] .drives .row.drive i, html[data-look="1993"] .drives .row.file .s, html[data-look="1993"] .drives .row.empty { color:var(--k-lo); }
+  html[data-look="1993"] .drives .row:hover { background:transparent; }
+  html[data-look="1993"] .drives .row.sel { background:var(--k-navy); color:#fff; }
+  html[data-look="1993"] .drives .row.sel .s, html[data-look="1993"] .drives .row.sel i { color:#fff; }
+  html[data-look="1993"] .drives:focus .row.sel { outline:1px dotted #fff; outline-offset:-2px; }
+  html[data-look="1993"] .drives .row.drive::before { content:''; width:16px; height:10px; margin-right:2px; flex:none; background:var(--k-face); box-shadow:inset 0 0 0 1px var(--k-dk), inset 0 -3px 0 var(--k-lo); }
+  /* a machine's strip and an editor's: a toolbar of raised buttons */
+  html[data-look="1993"] .pc .strip, html[data-look="1993"] .ed .strip { background:var(--k-face); color:#000; border-bottom:1px solid var(--k-dk); font:12px var(--k-sans); }
+  html[data-look="1993"] .pc .strip .state, html[data-look="1993"] .ed .strip .pos { color:var(--k-lo); }
+  html[data-look="1993"] .pc .strip button, html[data-look="1993"] .ed .strip button, html[data-look="1993"] .pc .off button {
+    background:var(--k-face); color:#000; border:0; border-radius:0; box-shadow:var(--raised); font:12px var(--k-sans); padding:1px 10px; height:22px; }
+  html[data-look="1993"] .pc .strip button:active, html[data-look="1993"] .ed .strip button:active:not(:disabled) { box-shadow:var(--sunken); }
+  html[data-look="1993"] .pc .strip button:hover, html[data-look="1993"] .ed .strip button:hover:not(:disabled) { color:#000; }
+  html[data-look="1993"] .ed .strip button:disabled { color:var(--k-lo); opacity:1; text-shadow:1px 1px var(--k-hi); }
+  html[data-look="1993"] .pc .strip select { background:var(--k-win); color:#000; border:0; border-radius:0; box-shadow:var(--sunken); font:12px var(--k-sans); height:22px; padding:0 4px; }
+  html[data-look="1993"] .pc .strip .led { border-radius:0; border:1px solid var(--k-dk); background:#004000; box-shadow:none; }
+  html[data-look="1993"] .pc .strip .led.on { background:#00FF00; box-shadow:none; }
+  html[data-look="1993"] .pc .strip .led.turbo.on { background:#FFFF00; }
+  html[data-look="1993"] .pc .strip .led.disk.on { background:#FF0000; }
+  html[data-look="1993"] .pc .off { color:#AAA; font:12px var(--k-mono); }
+  html[data-look="1993"] .pc.focused .screen { box-shadow:inset 0 0 0 2px var(--k-navy); }
+  html[data-look="1993"] .ed { background:var(--k-win); }
+  html[data-look="1993"] .ed textarea { background:var(--k-win); color:#000; font:14px/1.3 var(--k-mono); }
+  html[data-look="1993"] .ed.focused textarea { box-shadow:inset 0 0 0 1px var(--k-navy); }
+  html[data-look="1993"] .ed .strip .dirty { color:#800000; }
+  /* the status line: sunken panels on grey */
+  html[data-look="1993"] .status { background:var(--k-face); color:#000; border-top:1px solid var(--k-hi); font:12px var(--k-sans); padding:2px 4px; gap:4px; }
+  html[data-look="1993"] .status > span { box-shadow:inset 1px 1px var(--k-lo), inset -1px -1px var(--k-hi); padding:1px 6px; }
+  html[data-look="1993"] .status #msg { color:#000; }
+  html[data-look="1993"] .hosthint { background:#FFFFE1; color:#000; border:1px solid var(--k-dk); border-radius:0; box-shadow:2px 2px 0 var(--k-dk); font:12px var(--k-sans); }
+  html[data-look="1993"] .hosthint b, html[data-look="1993"] .help-table td:first-child { color:var(--k-navy); }
+  /* boxes: grey, a navy title bar, raised buttons, sunken fields */
+  html[data-look="1993"] .gcu-dialog { background:var(--k-face); color:#000; border:1px solid var(--k-dk); border-radius:0; box-shadow:var(--raised), 4px 4px 0 rgba(0,0,0,.5); }
+  html[data-look="1993"] .gcu-dialog-header { background:var(--k-navy); color:#fff; border:0; margin:3px 3px 0; padding:2px 6px; }
+  html[data-look="1993"] .gcu-dialog-title { color:#fff; font:bold 12px var(--k-sans); text-align:center; flex:1; }
+  html[data-look="1993"] .gcu-dialog-close { background:var(--k-face); color:#000; border-radius:0; box-shadow:var(--raised); }
+  html[data-look="1993"] .gcu-dialog-message, html[data-look="1993"] .help-table { color:#000; font:12px var(--k-sans); white-space:pre-wrap; }
+  html[data-look="1993"] .gcu-dialog-button { background:var(--k-face); color:#000; border:0; border-radius:0; box-shadow:var(--raised); font:12px var(--k-sans); min-width:76px; padding:4px 12px; }
+  html[data-look="1993"] .gcu-dialog-button-default { box-shadow:0 0 0 1px var(--k-dk), var(--raised); }
+  html[data-look="1993"] .gcu-dialog-button:active { box-shadow:var(--sunken); }
+  html[data-look="1993"] .gcu-dialog-button-danger { color:#000; }
+  html[data-look="1993"] .gcu-dialog-input { background:var(--k-win); color:#000; border:0; border-radius:0; box-shadow:var(--sunken); font:12px var(--k-sans); }
+  html[data-look="1993"] .gcu-dialog-backdrop { background:transparent; }
+  html[data-look="1993"] * { scrollbar-color:var(--k-face) #E0E0E0; }
 </style>
+<script>
+  // the look, before the first paint: 1993 unless this browser chose GCU (View › Look)
+  try { document.documentElement.dataset.look = localStorage.getItem('starstereo-93.look') || '1993'; } catch { document.documentElement.dataset.look = '1993'; }
+</script>
 </head>
 <body>
 <div id="wb">
