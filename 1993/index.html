@@ -3,75 +3,162 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>STARSTER 93 — wuffle, 1993</title>
-<meta name="description" content="STARSTER 93, the Professional DOS engine of StarStereo 93: wuffle's imagined 1993 ancestor, a stereonet program in integer-only C for 32-bit DOS, running in DOSBox.">
+<title>StarStereo 93 — wuffle, 1993</title>
+<meta name="description" content="StarStereo 93, the Professional DOS Engine: wuffle's imagined 1993 ancestor, a stereonet program in integer-only C for 32-bit DOS, running in DOSBox.">
 <style>
-  :root { --bg:#14171b; --panel:#1d2126; --ink:#d8dde3; --soft:#8b949e; --rule:#2c323a; --amber:#ffb347; --go:#5ccb80; --info:#4aa3df; }
+  :root {
+    --desk:#16181b; --ink:#d9dde2; --soft:#8d949c; --rule:#2b3036; --amber:#ffb347; --info:#5aa9e0;
+    --case:#d8d4c8; --case-hi:#e4e1d7; --case-lo:#c2bdb0; --bezel:#b8b4a7; --bezel-lo:#9f9b8e; --plate:#5d5a52;
+    --cap:#efede7; --cap-lo:#d6d3ca; --cap-edge:#a8a497; --cap-ink:#2c2c2a; --cap-dark:#a6a398;
+  }
   * { box-sizing:border-box; }
-  html, body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  main { max-width:980px; margin:0 auto; padding:24px 16px 48px; }
-  header { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 16px; margin-bottom:14px; }
-  h1 { margin:0; font:700 22px/1.2 ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing:.02em; color:var(--amber); }
-  header .sub { color:var(--soft); font-family:ui-monospace, Consolas, monospace; font-size:13px; }
-  .bezel { position:relative; background:#2a2620; border-radius:18px; padding:22px 22px 14px; box-shadow:inset 0 0 0 2px #3a342b, 0 10px 40px #0008; }
-  .screen { position:relative; aspect-ratio:4 / 3; width:100%; background:#000; border-radius:10px; overflow:hidden; box-shadow:inset 0 0 40px #000c; }
-  .screen canvas { position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; image-rendering:crisp-edges; outline:none; }
-  .screen .start { position:absolute; inset:0; display:grid; place-items:center; text-align:center; color:#cfc6b0; font:14px/1.6 ui-monospace, Consolas, monospace; cursor:pointer; background:radial-gradient(#1b1b1b, #000); border:0; width:100%; }
+  html, body { margin:0; background:var(--desk); color:var(--ink); font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width:1240px; margin:0 auto; padding:22px 16px 48px; }
+  header { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 14px; margin-bottom:14px; }
+  h1 { margin:0; font:700 21px/1.2 ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing:.02em; color:var(--amber); }
+  header .sub { color:var(--soft); font:13px ui-monospace, Consolas, monospace; }
+
+  /* the monitor: an IBM PS/2's warm grey */
+  .case { background:linear-gradient(180deg, var(--case-hi), var(--case) 30%, var(--case-lo)); border-radius:16px; padding:22px 24px 14px;
+    box-shadow:inset 0 1px 0 #f2efe6, inset 0 -2px 0 #b3ae9f, 0 18px 50px #000a, 0 2px 0 #8f8a7c; }
+  .bezel { background:var(--bezel); border-radius:12px; padding:16px; box-shadow:inset 0 3px 8px var(--bezel-lo), inset 0 -1px 0 #cdc9bd; }
+  .screen { position:relative; aspect-ratio:4 / 3; width:100%; background:#050505; border-radius:8px; overflow:hidden;
+    display:grid; place-items:center; box-shadow:inset 0 0 30px #000; }
+  .screen canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; outline:none; width:100%; height:100%; }
+  .screen .start { position:absolute; inset:0; display:grid; place-items:center; text-align:center; color:#9d9682; font:14px/1.7 ui-monospace, Consolas, monospace;
+    cursor:pointer; background:radial-gradient(#101010, #030303); border:0; width:100%; }
   .screen .start[hidden] { display:none; }
-  .screen .start b { display:block; font-size:20px; color:var(--amber); margin-bottom:6px; }
-  .screen.drop::after { content:"drop a wuffle CSV: it becomes FIELD.DAT"; position:absolute; inset:0; display:grid; place-items:center; background:#0009; border:2px dashed var(--amber); border-radius:10px; color:var(--amber); font:16px ui-monospace, monospace; }
-  .foot { display:flex; align-items:center; gap:10px; margin-top:10px; color:#9b917c; font:12px ui-monospace, Consolas, monospace; }
-  .led { width:8px; height:8px; border-radius:50%; background:#3b2f22; box-shadow:0 0 0 1px #0006; }
-  .led.on { background:var(--go); box-shadow:0 0 8px var(--go); }
-  .foot .brand { margin-left:auto; letter-spacing:.2em; }
-  .keys { display:flex; flex-wrap:wrap; gap:4px; margin-top:10px; }
-  .keys button { flex:1 1 52px; min-height:34px; font:600 12px ui-monospace, Consolas, monospace; color:#e9e2d0; background:#3a342b; border:1px solid #4a4236; border-radius:4px; cursor:pointer; }
-  .keys button:active { background:#4a4236; }
-  .keys button span { color:#a79c86; font-weight:400; }
-  section { margin-top:22px; display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px 28px; }
+  .screen .start b { display:block; font-size:18px; color:#d8cfb6; margin-bottom:6px; letter-spacing:.06em; }
+  .screen.drop::after { content:"drop a file: it goes onto C:"; position:absolute; inset:0; display:grid; place-items:center; background:#000a;
+    border:2px dashed var(--amber); border-radius:8px; color:var(--amber); font:16px ui-monospace, monospace; }
+  .plate { display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; margin-top:12px; color:var(--plate); font:600 11px/1 system-ui, sans-serif; letter-spacing:.08em; }
+  .badge { padding:5px 10px; border-radius:3px; background:linear-gradient(#cfcbbf, #c5c0b3); box-shadow:inset 0 1px 0 #e8e5db, 0 1px 0 #a7a295;
+    font:700 12px ui-monospace, Consolas, monospace; letter-spacing:.14em; color:#4d4a43; }
+  .plate .gap { flex:1; }
+  .led { display:inline-block; width:8px; height:8px; border-radius:50%; background:#5b5346; box-shadow:inset 0 1px 1px #0006; vertical-align:middle; margin-right:5px; }
+  .led.on { background:#46e07a; box-shadow:0 0 6px #46e07a; }
+  .led.turbo.on { background:#ffb02e; box-shadow:0 0 6px #ffb02e; }
+  .plate select { font:600 11px system-ui, sans-serif; color:#3e3b35; background:linear-gradient(#e7e4da, #cdc9bd); border:1px solid #a29d90; border-radius:3px; padding:3px 4px; }
+  .power { width:34px; height:22px; border-radius:4px; border:1px solid #9f9a8c; background:linear-gradient(#e7e4da, #c9c4b7); box-shadow:0 2px 0 #9f9a8c; cursor:pointer; color:#4d4a43; font:700 10px system-ui; }
+  .power:active { transform:translateY(1px); box-shadow:0 1px 0 #9f9a8c; }
+  .icon { background:none; border:0; color:var(--plate); cursor:pointer; font:600 11px system-ui; letter-spacing:.08em; padding:2px 4px; }
+
+  /* the keys: a Model M's caps */
+  .kbd { margin-top:14px; display:flex; flex-direction:column; gap:7px; }
+  .row { display:flex; flex-wrap:wrap; gap:6px; }
+  .row .sep { width:12px; }
+  .key { min-width:40px; height:38px; padding:0 7px; border-radius:5px; cursor:pointer; color:var(--cap-ink); font:500 12px/1 system-ui, "Helvetica Neue", Arial, sans-serif;
+    background:linear-gradient(180deg, var(--cap) 0%, var(--cap-lo) 100%); border:1px solid var(--cap-edge); border-bottom-width:4px; box-shadow:0 1px 0 #0008; }
+  .key.dark { background:linear-gradient(180deg, #c3c0b6, var(--cap-dark)); }
+  .key.wide { min-width:74px; }
+  .key.space { min-width:130px; }
+  .key:active, .key.down { transform:translateY(2px); border-bottom-width:2px; }
+  .key small { display:block; margin-top:3px; font-size:9px; color:#6a675f; }
+
+  .side { display:grid; grid-template-columns:minmax(0, 1fr) 290px; gap:18px; align-items:start; }
+  @media (max-width: 1060px) { .side { grid-template-columns:1fr; } }   /* the screen keeps its 640 px; the drives go below */
+  .drives { background:#1e2125; border:1px solid var(--rule); border-radius:8px; padding:12px 14px; font:13px/1.45 system-ui, sans-serif; }
+  .drives h2 { margin:0 0 8px; font:700 12px ui-monospace, Consolas, monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--soft); }
+  .drives .btns { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .drives button { font:600 12px system-ui, sans-serif; color:var(--ink); background:#2b3036; border:1px solid #3a4048; border-radius:4px; padding:5px 9px; cursor:pointer; }
+  .drives button:hover { background:#343a42; }
+  .drives button:disabled { opacity:.45; cursor:default; }
+  .drive { margin-top:8px; }
+  .drive b { font:700 13px ui-monospace, Consolas, monospace; color:var(--amber); }
+  .drive ul { list-style:none; margin:4px 0 0; padding:0; max-height:220px; overflow:auto; }
+  .drive li { display:flex; gap:8px; align-items:baseline; padding:2px 0; font:12px ui-monospace, Consolas, monospace; }
+  .drive li span { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .drive li em { color:var(--soft); font-style:normal; }
+  .drive li a { color:var(--info); text-decoration:none; }
+  .drives .note { color:var(--soft); font-size:12px; margin-top:8px; }
+  .status { margin-top:8px; min-height:1.5em; color:var(--soft); font:12px ui-monospace, Consolas, monospace; }
+
+  section { margin-top:26px; display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px 28px; }
   section h2 { margin:0 0 4px; font:700 13px ui-monospace, Consolas, monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--soft); }
   section p { margin:0 0 8px; }
   a { color:var(--info); }
   code { font:13px ui-monospace, Consolas, monospace; color:var(--amber); }
   .fiction { border-left:3px solid var(--amber); padding-left:10px; }
-  .status { margin-top:6px; min-height:1.5em; color:var(--soft); font:12px ui-monospace, Consolas, monospace; }
+  input[type=file] { display:none; }
 </style>
 </head>
 <body>
 <main>
   <header>
-    <h1>STARSTER 93</h1>
-    <span class="sub">v3.0 · the Professional DOS engine of StarStereo 93 · 386SX or better, math coprocessor NOT required</span>
+    <h1>StarStereo 93</h1>
+    <span class="sub">the Professional DOS Engine 3.0 (STARSTER.EXE) · 386SX or better · math coprocessor NOT required</span>
   </header>
 
-  <div class="bezel">
-    <div class="screen" id="screen">
-      <canvas id="cv" width="640" height="480" tabindex="0" aria-label="the DOS screen"></canvas>
-      <button class="start" id="start" type="button"><span><b>▶ power on</b>boots DOS and runs <code>STARSTER FIELD94.DAT /KAMB</code><br>F1 for help · F10 quits to the DOS prompt · drop a wuffle CSV here</span></button>
+  <div class="side">
+    <div>
+      <div class="case">
+        <div class="bezel">
+          <div class="screen" id="screen">
+            <canvas id="cv" width="640" height="480" tabindex="0" aria-label="the DOS screen"></canvas>
+            <button class="start" id="start" type="button"><span><b>▶ POWER</b>boots DOS and runs StarStereo<br>F10 opens its menus · F1 lists the keys<br>drop a wuffle CSV here: it goes onto C:</span></button>
+          </div>
+        </div>
+        <div class="plate">
+          <span class="badge">StarStereo</span>
+          <span class="gap"></span>
+          <label title="the CPU this PC has; full speed is the Turbo switch">CPU
+            <select id="cpu">
+              <option value="2500">386SX/25</option>
+              <option value="4500" selected>386DX/33</option>
+              <option value="15000">486DX2/66</option>
+              <option value="max">TURBO (no limit)</option>
+            </select></label>
+          <span><span class="led turbo" id="turbo"></span>TURBO</span>
+          <button class="icon" id="full" type="button" title="the screen, full screen">⛶ FULL</button>
+          <span><span class="led" id="led"></span><span id="what">OFF</span></span>
+          <button class="power" id="power" type="button" title="power">I/O</button>
+        </div>
+      </div>
+      <div class="kbd" id="keys" aria-label="keys">
+        <div class="row">
+          <button class="key" data-k="256">Esc</button><span class="sep"></span>
+          <button class="key" data-k="290">F1<small>keys</small></button><button class="key" data-k="291">F2<small>open</small></button><button class="key" data-k="292">F3<small>net</small></button><button class="key" data-k="293">F4<small>points</small></button><span class="sep"></span>
+          <button class="key" data-k="294">F5<small>circles</small></button><button class="key" data-k="295">F6<small>contours</small></button><button class="key" data-k="296">F7<small>stats</small></button><button class="key" data-k="297">F8<small>PCX</small></button><span class="sep"></span>
+          <button class="key" data-k="298">F9<small>screen</small></button><button class="key" data-k="299">F10<small>menus</small></button><button class="key" data-k="300">F11</button><button class="key" data-k="301">F12</button>
+        </div>
+        <div class="row">
+          <button class="key dark wide" data-k="258">Tab<small>table</small></button><button class="key dark" data-k="260">Ins</button><button class="key dark" data-k="261">Del</button><span class="sep"></span>
+          <button class="key dark" data-k="263">←</button><button class="key dark" data-k="265">↑</button><button class="key dark" data-k="264">↓</button><button class="key dark" data-k="262">→</button><span class="sep"></span>
+          <button class="key space" data-k="32">Space</button><button class="key dark wide" data-k="257">Enter</button>
+        </div>
+      </div>
+      <div class="status" id="status"></div>
     </div>
-    <div class="foot"><span class="led" id="led"></span><span id="what">off</span><span class="brand">GCU · VGA</span></div>
+
+    <aside class="drives" aria-label="drives">
+      <h2>Drives</h2>
+      <div class="btns">
+        <button type="button" id="insert" title="a file from this computer onto C:">Insert a file…</button>
+        <button type="button" id="mount" title="a folder from this computer as D:">Mount a folder…</button>
+        <button type="button" id="writeback" hidden title="what StarStereo saved on D:, written into the folder">Write D: back</button>
+      </div>
+      <input type="file" id="pickfile" multiple>
+      <input type="file" id="pickdir" webkitdirectory multiple>
+      <div class="drive"><b>C:\</b><ul id="lsC"><li><em>power on to see it</em></li></ul></div>
+      <div class="drive"><b>D:\</b> <em id="dname" style="font-size:12px;color:var(--soft)"></em><ul id="lsD"></ul></div>
+      <p class="note">Files put on a drive show up in StarStereo's File › Open at once; at the DOS prompt, type <code>RESCAN</code> first. What StarStereo saves — a picture (F8), a data file — appears here to download.</p>
+    </aside>
   </div>
-  <div class="keys" id="keys" aria-label="function keys">
-    <button data-k="290">F1 <span>help</span></button><button data-k="291">F2 <span>open</span></button><button data-k="292">F3 <span>net</span></button><button data-k="293">F4 <span>data</span></button><button data-k="294">F5 <span>circles</span></button>
-    <button data-k="295">F6 <span>contours</span></button><button data-k="296">F7 <span>stats</span></button><button data-k="297">F8 <span>PCX</span></button><button data-k="298">F9 <span>mode</span></button><button data-k="299">F10 <span>quit</span></button>
-  </div>
-  <div class="status" id="status"></div>
 
   <section>
     <div>
       <h2>What this is</h2>
-      <p>STARSTER is a stereonet program for 32-bit DOS: equal-area and equal-angle nets, poles and great circles, Kamb contours, the orientation tensor and Woodcock's K, PCX output and a batch mode. It runs here in DOSBox, in your browser, with nothing fetched from anywhere but this site.</p>
+      <p>StarStereo 93's Professional DOS Engine: a stereonet program for 32-bit DOS, with menus, a data table, a cursor to read the net with, Kamb contours, the orientation tensor and Woodcock's K, PCX output and a batch mode. It runs here in DOSBox, at the speed of the CPU on the case, with nothing fetched from anywhere but this site.</p>
       <p>Its arithmetic is integers only: CORDIC for every sine and arctangent, fixed point for the rest, no floating-point instruction anywhere in the program. The build checks that, and checks its numbers against <a href="../">wuffle</a>'s: every contour count agrees exactly.</p>
     </div>
     <div class="fiction">
       <h2>A design fiction</h2>
-      <p>StarStereo never existed. STARSTER is wuffle's imagined ancestor, written in 2026 as if it had shipped in 1993: C89, Open Watcom, the DOS/32A extender, Mode X. The real line it nods to is OpenStereo (Grohmann &amp; Campanha, 2009/10) and its 2016 rewrite.</p>
+      <p>StarStereo never existed. It is wuffle's imagined ancestor, written in 2026 as if it had shipped in 1993: C89, Open Watcom, the DOS/32A extender, Mode X. The real line it nods to is OpenStereo (Grohmann &amp; Campanha, 2009/10) and its 2016 rewrite.</p>
       <p><a href="dos/README.TXT">README.TXT</a> · <a href="dos/STARSTER.EXE" download>STARSTER.EXE</a> · <a href="dos/FIELD94.DAT" download>FIELD94.DAT</a> · <a href="https://github.com/gentropic/auditable/tree/main/tools/starster">source</a> (MIT)</p>
     </div>
     <div>
-      <h2>Your data</h2>
-      <p>Drop a CSV from wuffle (a field log, or a dataset exported from the desk) on the screen: it is written to the C: drive as <code>FIELD.DAT</code> and STARSTER opens it. Plain text works too, <code>dipdir dip</code> a line.</p>
-      <p>At the DOS prompt: <code>STARSTER /X FIELD94.DAT</code>, <code>TYPE README.TXT</code>, <code>DIR</code>.</p>
+      <h2>At the DOS prompt</h2>
+      <p>F10 then Alt-X (or File › Exit) leaves StarStereo for <code>C:\&gt;</code>. There: <code>MORE README.TXT</code> to read the manual a screen at a time, <code>STARSTER /X FIELD94.DAT</code> for the 320×240 preview, <code>DIR D:</code> for your folder.</p>
     </div>
   </section>
 </main>
@@ -81,9 +168,11 @@
   const $ = (id) => document.getElementById(id);
   const cv = $('cv'), ctx = cv.getContext('2d'), screen = $('screen'), status = (s) => { $('status').textContent = s; };
   emulators.pathPrefix = new URL('emulators/', location.href).href;
-  let ci = null, booting = false, dosFiles = null, image = null;
+  let ci = null, booting = false, image = null, base = null;
+  const extraC = new Map();                     // files inserted onto C: (kept across a restart)
+  let folder = null, folderName = '', folderFiles = new Map();   // D: — the mounted folder: path → bytes as mounted
 
-  // the browser's key → js-dos's (GLFW) key codes
+  // ---- keys: the browser's to js-dos's (GLFW) codes; each held >= 60 ms, so DOSBox sees it
   const KEY = { Escape: 256, Enter: 257, NumpadEnter: 335, Tab: 258, Backspace: 259, Insert: 260, Delete: 261, ArrowRight: 262, ArrowLeft: 263,
     ArrowDown: 264, ArrowUp: 265, PageUp: 266, PageDown: 267, Home: 268, End: 269, Space: 32, Quote: 39, Comma: 44, Minus: 45, Period: 46,
     Slash: 47, Semicolon: 59, Equal: 61, BracketLeft: 91, Backslash: 92, BracketRight: 93, Backquote: 96, ShiftLeft: 340, ControlLeft: 341,
@@ -96,12 +185,11 @@
     m = e.code.match(/^F(\d+)$/); if (m && +m[1] <= 12) return 289 + +m[1];
     return null;
   };
-  // a key held for at least 60 ms: a press and release in the same instant can fall between DOSBox's polls
   const downAt = new Map();
   const onKey = (down) => (e) => {
-    if (!ci) return;
+    if (!ci || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
     const k = code(e); if (k == null) return;
-    e.preventDefault();                         // F1, F3, F5 … belong to DOS while it runs
+    e.preventDefault();                         // F1, F3, F5, Alt … belong to DOS while it runs
     if (down) { if (!e.repeat) downAt.set(k, performance.now()); ci.sendKeyEvent(k, true); return; }
     const held = performance.now() - (downAt.get(k) ?? 0), c = ci;
     downAt.delete(k);
@@ -109,61 +197,192 @@
   };
   addEventListener('keydown', onKey(true));
   addEventListener('keyup', onKey(false));
-  for (const b of $('keys').querySelectorAll('button')) b.onclick = () => { if (ci) { ci.simulateKeyPress(+b.dataset.k); cv.focus(); } else boot(); };
+  for (const b of $('keys').querySelectorAll('.key')) b.onclick = () => {
+    if (!ci) { boot(); return; }
+    ci.simulateKeyPress(+b.dataset.k); cv.focus();
+  };
 
-  async function files() {
-    if (dosFiles) return dosFiles;
-    const get = async (n) => { const r = await fetch('dos/' + n); if (!r.ok) throw new Error(`dos/${n}: ${r.status}`); return { path: n, contents: new Uint8Array(await r.arrayBuffer()) }; };
-    dosFiles = await Promise.all(['STARSTER.EXE', 'FIELD94.DAT', 'README.TXT'].map(get));
-    return dosFiles;
+  // ---- the screen, scaled by whole numbers where it can (crisp text), else to fit
+  function fit() {
+    const W = screen.clientWidth, H = screen.clientHeight, w = cv.width, h = cv.height;
+    const s = Math.min(Math.floor(W / w), Math.floor(H / h));
+    if (s >= 1) { cv.style.width = w * s + 'px'; cv.style.height = h * s + 'px'; }
+    else { const f = Math.min(W / w, H / h); cv.style.width = w * f + 'px'; cv.style.height = h * f + 'px'; }
   }
-  async function boot(extra = null) {
+  new ResizeObserver(fit).observe(screen);
+  $('full').onclick = () => { (document.fullscreenElement ? document.exitFullscreen() : screen.requestFullscreen()).catch(() => {}); };
+
+  // ---- the machine
+  async function files() {
+    if (base) return base;
+    const get = async (n) => { const r = await fetch('dos/' + n); if (!r.ok) throw new Error(`dos/${n}: ${r.status}`); return [n, new Uint8Array(await r.arrayBuffer())]; };
+    base = await Promise.all(['STARSTER.EXE', 'MORE.COM', 'FIELD94.DAT', 'README.TXT'].map(get));
+    return base;
+  }
+  const cpuName = () => $('cpu').selectedOptions[0].textContent;
+  function lights() {
+    $('led').classList.toggle('on', !!ci);
+    $('turbo').classList.toggle('on', $('cpu').value === 'max');
+    $('what').textContent = booting ? 'BOOT' : ci ? 'ON' : 'OFF';
+  }
+  // carry: what is on the drives now (a restart keeps it)
+  async function carry() {
+    const out = [];
+    if (!ci) return out;
+    const tree = await ci.fsTree();
+    const walk = async (node, at) => { for (const x of node.nodes || []) { const p = at + x.name; if (x.nodes) await walk(x, p + '/'); else out.push([p, await ci.fsReadFile(p)]); } };
+    for (const d of tree.nodes || []) if (d.name === 'C' || d.name === 'D') await walk(d, d.name + '/');
+    return out;
+  }
+  async function boot(keep = null) {
     if (booting) return;
-    booting = true;
+    booting = true; lights();
     try {
       if (ci) {                                 // the old session goes (its exit can hang: don't wait long)
         const old = ci; ci = null; image = null;
         await Promise.race([old.exit().catch(() => {}), new Promise((r) => setTimeout(r, 1500))]);
       }
-      $('start').hidden = true; $('led').classList.add('on'); $('what').textContent = 'booting…';
-      // copies: emulators transfers the buffers to its worker, which detaches them — a cached one is empty next boot
-      const fs = (await files()).map((f) => ({ path: f.path, contents: f.contents.slice() }));
-      let run = 'STARSTER FIELD94.DAT /KAMB';
-      if (extra) { fs.push({ path: 'FIELD.DAT', contents: extra }); run = 'STARSTER FIELD.DAT /KAMB'; }
-      const conf = `[sdl]\nautolock=false\n[cpu]\ncore=auto\ncycles=max\n[autoexec]\n@echo off\nmount c .\nc:\necho.\necho StarStereo 93 - STARSTER 3.0 on drive C:\necho.\n${run}\n`;
+      $('start').hidden = true;
+      // copies: emulators transfers the buffers to its worker, which detaches them
+      const fs = keep ? keep.map(([p, b]) => ({ path: p, contents: b.slice() }))
+        : [...(await files()).map(([n, b]) => ({ path: 'C/' + n, contents: b.slice() })),
+           ...[...extraC].map(([n, b]) => ({ path: 'C/' + n, contents: b.slice() })),
+           ...(folderFiles.size ? [...folderFiles].map(([p, b]) => ({ path: 'D/' + p, contents: b.slice() })) : [{ path: 'D/DRIVE_D.TXT', contents: new TextEncoder().encode('Drive D: is a folder of yours: Mount a folder on the page.\r\n') }])];
+      const cycles = $('cpu').value === 'max' ? 'max' : 'fixed ' + $('cpu').value;
+      const conf = `[sdl]\nautolock=false\n[cpu]\ncore=normal\ncputype=386\ncycles=${cycles}\n[autoexec]\n@echo off\nmount c ./C > NUL\nmount d ./D > NUL\nc:\necho.\necho StarStereo 93 - Professional DOS Engine 3.0 on drive C:  (${cpuName()})\necho.\nSTARSTER FIELD94.DAT /KAMB\necho.\necho MORE README.TXT reads the manual; STARSTER starts StarStereo again.\n`;
       ci = await emulators.dosboxWorker([...fs, { dosboxConf: conf, jsdosConf: { version: '8' } }]);
       ci.mute();
-      ci.events().onFrameSize((w, h) => { cv.width = w; cv.height = h; image = ctx.createImageData(w, h); $('what').textContent = `${w}×${h}`; });
+      ci.events().onFrameSize((w, h) => { cv.width = w; cv.height = h; image = ctx.createImageData(w, h); fit(); });
       ci.events().onFrame((rgb, rgba) => {
-        if (!image) { cv.width = ci.width(); cv.height = ci.height(); image = ctx.createImageData(cv.width, cv.height); }
+        if (!image) { cv.width = ci.width(); cv.height = ci.height(); image = ctx.createImageData(cv.width, cv.height); fit(); }
         const d = image.data;
         if (rgba) d.set(rgba.subarray(0, d.length));
         else if (rgb) for (let i = 0, j = 0; j < d.length; i += 3, j += 4) { d[j] = rgb[i]; d[j + 1] = rgb[i + 1]; d[j + 2] = rgb[i + 2]; d[j + 3] = 255; }
         ctx.putImageData(image, 0, 0);
       });
-      ci.events().onExit(() => { $('led').classList.remove('on'); $('what').textContent = 'off'; });
+      ci.events().onExit(() => { ci = null; lights(); });
       cv.focus();
-      status(extra ? 'your file is C:\\FIELD.DAT' : 'F1 for help; F10 quits to the DOS prompt, where STARSTER /X FIELD94.DAT starts it in Mode X');
+      status(`${cpuName()} · F10 for the menus, F1 for the keys`);
+      setTimeout(list, 1500);
     } catch (e) {
       status('could not start DOSBox: ' + (e.message || e));
-      $('start').hidden = false; $('led').classList.remove('on'); $('what').textContent = 'off';
-    } finally { booting = false; }
+      $('start').hidden = false;
+    } finally { booting = false; lights(); }
   }
   $('start').onclick = () => boot();
+  $('power').onclick = async () => {
+    if (ci) { const old = ci; ci = null; lights(); $('start').hidden = false; await Promise.race([old.exit().catch(() => {}), new Promise((r) => setTimeout(r, 1500))]); list(); }
+    else boot();
+  };
+  $('cpu').onchange = async () => {
+    lights();
+    if (!ci) return;
+    status(`restarting at ${cpuName()} — the files on C: and D: come along`);
+    boot(await carry());
+  };
   cv.addEventListener('pointerdown', () => cv.focus());
 
-  // drop a CSV: it becomes C:\FIELD.DAT (DOS line ends), and STARSTER opens it
+  // ---- the drives: what is on them, to download
+  const size = (n) => (n < 1024 ? n + ' B' : (n / 1024).toFixed(1) + ' KB');
+  async function list() {
+    const show = (ul, items, empty) => {
+      ul.replaceChildren(...(items.length ? items : [Object.assign(document.createElement('li'), { innerHTML: `<em>${empty}</em>` })]));
+    };
+    if (!ci) { show($('lsC'), [], 'power on to see it'); show($('lsD'), [], ''); return; }
+    try {
+      const tree = await ci.fsTree(), out = { C: [], D: [] };
+      const walk = (node, at, drive) => { for (const x of node.nodes || []) { const p = at + x.name; if (x.nodes) walk(x, p + '/', drive); else out[drive].push([p, x.size]); } };
+      for (const d of tree.nodes || []) if (d.name === 'C' || d.name === 'D') walk(d, d.name + '/', d.name);
+      for (const dr of ['C', 'D']) show($('ls' + dr), out[dr].map(([p, n]) => {
+        const li = document.createElement('li'), name = p.slice(2);
+        li.innerHTML = `<span></span><em>${size(n)}</em><a href="#">save</a>`;
+        li.firstChild.textContent = name.replace(/\//g, '\\');
+        li.lastChild.onclick = async (e) => {
+          e.preventDefault();
+          const b = await ci.fsReadFile(p), a = document.createElement('a');
+          a.href = URL.createObjectURL(new Blob([b])); a.download = name.split('/').pop(); a.click();
+          setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+        };
+        return li;
+      }), dr === 'C' ? 'empty' : 'no folder mounted');
+    } catch { /* busy: next time */ }
+  }
+  setInterval(() => { if (ci && !booting && !document.hidden) list(); }, 4000);
+
+  // ---- insert a file onto C: (live: no restart)
+  async function insert(fileList) {
+    for (const f of fileList) {
+      if (f.size > 16e6) { status(`${f.name}: bigger than this PC's disk would like (16 MB)`); continue; }
+      const b = new Uint8Array(await f.arrayBuffer()), name = f.name.replace(/[^\w.\-~]/g, '_');
+      extraC.set(name, b);
+      if (ci) await ci.fsWriteFile('C/' + name, b.slice());
+      status(`${f.name} is on C: — File › Open (F2) lists it${ci ? '' : ' when the PC is on'}`);
+    }
+    list();
+  }
+  $('insert').onclick = () => $('pickfile').click();
+  $('pickfile').onchange = (e) => { insert(e.target.files); e.target.value = ''; };
   screen.addEventListener('dragover', (e) => { e.preventDefault(); screen.classList.add('drop'); });
   screen.addEventListener('dragleave', () => screen.classList.remove('drop'));
-  screen.addEventListener('drop', async (e) => {
-    e.preventDefault(); screen.classList.remove('drop');
-    const f = e.dataTransfer.files[0]; if (!f) return;
-    if (f.size > 8e6) { status('that file is bigger than a field season (8 MB) — STARSTER would take a while'); return; }
-    const text = (await f.text()).replace(/\r?\n/g, '\r\n');
-    status(`${f.name} → C:\\FIELD.DAT`);
-    boot(new TextEncoder().encode(text));
-  });
-  window.__starster = { get ci() { return ci; }, boot };
+  screen.addEventListener('drop', (e) => { e.preventDefault(); screen.classList.remove('drop'); if (e.dataTransfer.files.length) insert(e.dataTransfer.files); });
+
+  // ---- mount a folder as D: (and, where the browser allows, write D: back into it)
+  async function readDir(handle, at = '') {
+    for await (const [name, h] of handle.entries()) {
+      if (h.kind === 'directory') await readDir(h, at + name + '/');
+      else { const f = await h.getFile(); if (f.size <= 16e6) folderFiles.set(at + name, new Uint8Array(await f.arrayBuffer())); }
+    }
+  }
+  async function mounted() {
+    $('dname').textContent = folderName ? `(${folderName})` : '';
+    $('writeback').hidden = !folder;
+    if (!ci) { status(`${folderName} will be D: when the PC is on`); return; }
+    for (const [p, b] of folderFiles) await ci.fsWriteFile('D/' + p, b.slice());
+    status(`${folderName} is D: — File › Open (F2), Tab to the drives`);
+    list();
+  }
+  $('mount').onclick = async () => {
+    if (window.showDirectoryPicker) {
+      try { folder = await showDirectoryPicker({ mode: 'readwrite' }); } catch { return; }
+      folderName = folder.name; folderFiles = new Map();
+      await readDir(folder);
+      mounted();
+    } else $('pickdir').click();
+  };
+  $('pickdir').onchange = async (e) => {             // no File System Access here: read only, and saves are downloads
+    folder = null; folderFiles = new Map();
+    for (const f of e.target.files) {
+      const p = f.webkitRelativePath.split('/').slice(1).join('/');
+      folderName = f.webkitRelativePath.split('/')[0];
+      if (f.size <= 16e6) folderFiles.set(p, new Uint8Array(await f.arrayBuffer()));
+    }
+    e.target.value = '';
+    mounted();
+  };
+  $('writeback').onclick = async () => {             // D:'s files that are new or changed, into the real folder
+    if (!folder || !ci) return;
+    let n = 0;
+    try {
+      const tree = await ci.fsTree(), D = (tree.nodes || []).find((x) => x.name === 'D'), all = [];
+      const walk = (node, at) => { for (const x of node.nodes || []) { if (x.nodes) walk(x, at + x.name + '/'); else all.push(at + x.name); } };
+      if (D) walk(D, '');
+      for (const p of all) {
+        if (p === 'DRIVE_D.TXT') continue;
+        const b = await ci.fsReadFile('D/' + p), was = folderFiles.get(p);
+        if (was && was.length === b.length && was.every((v, i) => v === b[i])) continue;
+        let dir = folder;
+        const parts = p.split('/');
+        for (const seg of parts.slice(0, -1)) dir = await dir.getDirectoryHandle(seg, { create: true });
+        const w = await (await dir.getFileHandle(parts.at(-1), { create: true })).createWritable();
+        await w.write(b); await w.close();
+        folderFiles.set(p, b.slice()); n++;
+      }
+      status(n ? `${n} file${n === 1 ? '' : 's'} written into ${folderName}` : `nothing on D: has changed since it was mounted`);
+    } catch (e) { status('could not write the folder: ' + (e.message || e)); }
+  };
+
+  lights();
+  window.__starster = { get ci() { return ci; }, boot, list, insert, carry };
 })();
 </script>
 </body>
