@@ -72,7 +72,10 @@ export class Machine {
         <span class="paused" hidden>paused (not in view)</span></div>`;
     const $ = (s) => el.querySelector(s);
     this.cv = $('canvas'); this.ctx = this.cv.getContext('2d'); this.screen = $('.screen');
-    this.cv.width = 640; this.cv.height = 400;
+    // what DOS draws lands here, at the machine's own resolution; `mid` is the whole-multiple step of present()
+    this.src = document.createElement('canvas'); this.src.width = 640; this.src.height = 480;
+    this.sctx = this.src.getContext('2d'); this.sctx.fillStyle = '#000'; this.sctx.fillRect(0, 0, 640, 480);
+    this.mid = document.createElement('canvas'); this.mctx = this.mid.getContext('2d');
     const sel = $('.cpu');
     for (const [v, n] of CPUS) sel.append(new Option(n, v));
     sel.value = this.cpu;
@@ -96,12 +99,27 @@ export class Machine {
     new IntersectionObserver((es) => { for (const x of es) this.setVisible(x.isIntersecting); }).observe(this.screen);
     this.lights();
   }
+  /** the screen as large as the pane allows, at a monitor's 4:3 — every VGA mode filled the tube (720x400 text too) */
   fit() {
-    const W = this.screen.clientWidth - 8, H = this.screen.clientHeight - 8, w = this.cv.width, h = this.cv.height;
+    const W = this.screen.clientWidth - 8, H = this.screen.clientHeight - 8;
     if (W <= 0 || H <= 0) return;
-    const s = Math.min(Math.floor(W / w), Math.floor(H / h));   // whole multiples where they fit: crisp text
-    const f = s >= 1 ? s : Math.min(W / w, H / h);
-    this.cv.style.width = Math.round(w * f) + 'px'; this.cv.style.height = Math.round(h * f) + 'px';
+    const w = Math.floor(Math.min(W, H * 4 / 3)), h = Math.floor(w * 3 / 4), dpr = window.devicePixelRatio || 1;
+    this.cv.style.width = w + 'px'; this.cv.style.height = h + 'px';
+    const bw = Math.round(w * dpr), bh = Math.round(h * dpr);
+    if (this.cv.width !== bw || this.cv.height !== bh) { this.cv.width = bw; this.cv.height = bh; }
+    this.present();
+  }
+  /** DOS's frame onto the visible canvas, "sharp bilinear": up by the next whole multiple with hard pixels, then
+   *  smoothly down to the size it has — every pixel the same size (no doubled rows shimmering through the text),
+   *  edges sharp but for a hairline; at a whole multiple, exact */
+  present() {
+    const s = this.src, bw = this.cv.width, bh = this.cv.height;
+    const kx = Math.max(1, Math.ceil(bw / s.width - 1e-6)), ky = Math.max(1, Math.ceil(bh / s.height - 1e-6));
+    if (this.mid.width !== s.width * kx || this.mid.height !== s.height * ky) { this.mid.width = s.width * kx; this.mid.height = s.height * ky; }
+    this.mctx.imageSmoothingEnabled = false;
+    this.mctx.drawImage(s, 0, 0, this.mid.width, this.mid.height);
+    this.ctx.imageSmoothingEnabled = true; this.ctx.imageSmoothingQuality = 'high';
+    this.ctx.drawImage(this.mid, 0, 0, bw, bh);
   }
   lights() {
     const $ = (s) => this.el.querySelector(s);
@@ -157,13 +175,15 @@ export class Machine {
       const ci = await emulators.dosboxWorker([...files, { dosboxConf: conf, jsdosConf: { version: '8' } }]);
       this.ci = ci;
       ci.mute();
-      ci.events().onFrameSize((w, h) => { this.cv.width = w; this.cv.height = h; this.image = this.ctx.createImageData(w, h); this.fit(); });
+      const size = (w, h) => { this.src.width = w; this.src.height = h; this.image = this.sctx.createImageData(w, h); this.fit(); };
+      ci.events().onFrameSize((w, h) => size(w, h));
       ci.events().onFrame((rgb, rgba) => {
-        if (!this.image || this.image.width !== this.cv.width) { this.cv.width = ci.width(); this.cv.height = ci.height(); this.image = this.ctx.createImageData(this.cv.width, this.cv.height); this.fit(); }
+        if (!this.image || this.image.width !== ci.width() || this.image.height !== ci.height()) size(ci.width(), ci.height());
         const d = this.image.data;
         if (rgba) d.set(rgba.subarray(0, d.length));
         else if (rgb) for (let i = 0, j = 0; j < d.length; i += 3, j += 4) { d[j] = rgb[i]; d[j + 1] = rgb[i + 1]; d[j + 2] = rgb[i + 2]; d[j + 3] = 255; }
-        this.ctx.putImageData(this.image, 0, 0);
+        this.sctx.putImageData(this.image, 0, 0);
+        this.present();
       });
       ci.events().onExit(() => { if (this.ci === ci) { this.ci = null; this.lights(); this.hooks.changed?.(this, 'power'); } });
       if (!this.visible) ci.pause();
