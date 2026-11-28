@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STARSTER 93 — wuffle, 1993</title>
+<meta name="description" content="STARSTER 93, the Professional DOS engine of StarStereo 93: wuffle's imagined 1993 ancestor, a stereonet program in integer-only C for 32-bit DOS, running in DOSBox.">
+<style>
+  :root { --bg:#14171b; --panel:#1d2126; --ink:#d8dde3; --soft:#8b949e; --rule:#2c323a; --amber:#ffb347; --go:#5ccb80; --info:#4aa3df; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width:980px; margin:0 auto; padding:24px 16px 48px; }
+  header { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 16px; margin-bottom:14px; }
+  h1 { margin:0; font:700 22px/1.2 ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing:.02em; color:var(--amber); }
+  header .sub { color:var(--soft); font-family:ui-monospace, Consolas, monospace; font-size:13px; }
+  .bezel { position:relative; background:#2a2620; border-radius:18px; padding:22px 22px 14px; box-shadow:inset 0 0 0 2px #3a342b, 0 10px 40px #0008; }
+  .screen { position:relative; aspect-ratio:4 / 3; width:100%; background:#000; border-radius:10px; overflow:hidden; box-shadow:inset 0 0 40px #000c; }
+  .screen canvas { position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; image-rendering:crisp-edges; outline:none; }
+  .screen .start { position:absolute; inset:0; display:grid; place-items:center; text-align:center; color:#cfc6b0; font:14px/1.6 ui-monospace, Consolas, monospace; cursor:pointer; background:radial-gradient(#1b1b1b, #000); border:0; width:100%; }
+  .screen .start[hidden] { display:none; }
+  .screen .start b { display:block; font-size:20px; color:var(--amber); margin-bottom:6px; }
+  .screen.drop::after { content:"drop a wuffle CSV: it becomes FIELD.DAT"; position:absolute; inset:0; display:grid; place-items:center; background:#0009; border:2px dashed var(--amber); border-radius:10px; color:var(--amber); font:16px ui-monospace, monospace; }
+  .foot { display:flex; align-items:center; gap:10px; margin-top:10px; color:#9b917c; font:12px ui-monospace, Consolas, monospace; }
+  .led { width:8px; height:8px; border-radius:50%; background:#3b2f22; box-shadow:0 0 0 1px #0006; }
+  .led.on { background:var(--go); box-shadow:0 0 8px var(--go); }
+  .foot .brand { margin-left:auto; letter-spacing:.2em; }
+  .keys { display:flex; flex-wrap:wrap; gap:4px; margin-top:10px; }
+  .keys button { flex:1 1 52px; min-height:34px; font:600 12px ui-monospace, Consolas, monospace; color:#e9e2d0; background:#3a342b; border:1px solid #4a4236; border-radius:4px; cursor:pointer; }
+  .keys button:active { background:#4a4236; }
+  .keys button span { color:#a79c86; font-weight:400; }
+  section { margin-top:22px; display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:14px 28px; }
+  section h2 { margin:0 0 4px; font:700 13px ui-monospace, Consolas, monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--soft); }
+  section p { margin:0 0 8px; }
+  a { color:var(--info); }
+  code { font:13px ui-monospace, Consolas, monospace; color:var(--amber); }
+  .fiction { border-left:3px solid var(--amber); padding-left:10px; }
+  .status { margin-top:6px; min-height:1.5em; color:var(--soft); font:12px ui-monospace, Consolas, monospace; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>STARSTER 93</h1>
+    <span class="sub">v3.0 · the Professional DOS engine of StarStereo 93 · 386SX or better, math coprocessor NOT required</span>
+  </header>
+
+  <div class="bezel">
+    <div class="screen" id="screen">
+      <canvas id="cv" width="640" height="480" tabindex="0" aria-label="the DOS screen"></canvas>
+      <button class="start" id="start" type="button"><span><b>▶ power on</b>boots DOS and runs <code>STARSTER FIELD94.DAT /KAMB</code><br>F1 for help · F10 quits to the DOS prompt · drop a wuffle CSV here</span></button>
+    </div>
+    <div class="foot"><span class="led" id="led"></span><span id="what">off</span><span class="brand">GCU · VGA</span></div>
+  </div>
+  <div class="keys" id="keys" aria-label="function keys">
+    <button data-k="290">F1 <span>help</span></button><button data-k="291">F2 <span>open</span></button><button data-k="292">F3 <span>net</span></button><button data-k="293">F4 <span>data</span></button><button data-k="294">F5 <span>circles</span></button>
+    <button data-k="295">F6 <span>contours</span></button><button data-k="296">F7 <span>stats</span></button><button data-k="297">F8 <span>PCX</span></button><button data-k="298">F9 <span>mode</span></button><button data-k="299">F10 <span>quit</span></button>
+  </div>
+  <div class="status" id="status"></div>
+
+  <section>
+    <div>
+      <h2>What this is</h2>
+      <p>STARSTER is a stereonet program for 32-bit DOS: equal-area and equal-angle nets, poles and great circles, Kamb contours, the orientation tensor and Woodcock's K, PCX output and a batch mode. It runs here in DOSBox, in your browser, with nothing fetched from anywhere but this site.</p>
+      <p>Its arithmetic is integers only: CORDIC for every sine and arctangent, fixed point for the rest, no floating-point instruction anywhere in the program. The build checks that, and checks its numbers against <a href="../">wuffle</a>'s: every contour count agrees exactly.</p>
+    </div>
+    <div class="fiction">
+      <h2>A design fiction</h2>
+      <p>StarStereo never existed. STARSTER is wuffle's imagined ancestor, written in 2026 as if it had shipped in 1993: C89, Open Watcom, the DOS/32A extender, Mode X. The real line it nods to is OpenStereo (Grohmann &amp; Campanha, 2009/10) and its 2016 rewrite.</p>
+      <p><a href="dos/README.TXT">README.TXT</a> · <a href="dos/STARSTER.EXE" download>STARSTER.EXE</a> · <a href="dos/FIELD94.DAT" download>FIELD94.DAT</a> · <a href="https://github.com/gentropic/auditable/tree/main/tools/starster">source</a> (MIT)</p>
+    </div>
+    <div>
+      <h2>Your data</h2>
+      <p>Drop a CSV from wuffle (a field log, or a dataset exported from the desk) on the screen: it is written to the C: drive as <code>FIELD.DAT</code> and STARSTER opens it. Plain text works too, <code>dipdir dip</code> a line.</p>
+      <p>At the DOS prompt: <code>STARSTER /X FIELD94.DAT</code>, <code>TYPE README.TXT</code>, <code>DIR</code>.</p>
+    </div>
+  </section>
+</main>
+<script src="emulators/emulators.js"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const cv = $('cv'), ctx = cv.getContext('2d'), screen = $('screen'), status = (s) => { $('status').textContent = s; };
+  emulators.pathPrefix = new URL('emulators/', location.href).href;
+  let ci = null, booting = false, dosFiles = null, image = null;
+
+  // the browser's key → js-dos's (GLFW) key codes
+  const KEY = { Escape: 256, Enter: 257, NumpadEnter: 335, Tab: 258, Backspace: 259, Insert: 260, Delete: 261, ArrowRight: 262, ArrowLeft: 263,
+    ArrowDown: 264, ArrowUp: 265, PageUp: 266, PageDown: 267, Home: 268, End: 269, Space: 32, Quote: 39, Comma: 44, Minus: 45, Period: 46,
+    Slash: 47, Semicolon: 59, Equal: 61, BracketLeft: 91, Backslash: 92, BracketRight: 93, Backquote: 96, ShiftLeft: 340, ControlLeft: 341,
+    AltLeft: 342, ShiftRight: 344, ControlRight: 345, AltRight: 346, CapsLock: 280 };
+  const code = (e) => {
+    if (KEY[e.code] != null) return KEY[e.code];
+    let m = e.code.match(/^Key([A-Z])$/); if (m) return m[1].charCodeAt(0);
+    m = e.code.match(/^Digit(\d)$/); if (m) return 48 + +m[1];
+    m = e.code.match(/^Numpad(\d)$/); if (m) return 320 + +m[1];
+    m = e.code.match(/^F(\d+)$/); if (m && +m[1] <= 12) return 289 + +m[1];
+    return null;
+  };
+  // a key held for at least 60 ms: a press and release in the same instant can fall between DOSBox's polls
+  const downAt = new Map();
+  const onKey = (down) => (e) => {
+    if (!ci) return;
+    const k = code(e); if (k == null) return;
+    e.preventDefault();                         // F1, F3, F5 … belong to DOS while it runs
+    if (down) { if (!e.repeat) downAt.set(k, performance.now()); ci.sendKeyEvent(k, true); return; }
+    const held = performance.now() - (downAt.get(k) ?? 0), c = ci;
+    downAt.delete(k);
+    setTimeout(() => c.sendKeyEvent(k, false), Math.max(0, 60 - held));
+  };
+  addEventListener('keydown', onKey(true));
+  addEventListener('keyup', onKey(false));
+  for (const b of $('keys').querySelectorAll('button')) b.onclick = () => { if (ci) { ci.simulateKeyPress(+b.dataset.k); cv.focus(); } else boot(); };
+
+  async function files() {
+    if (dosFiles) return dosFiles;
+    const get = async (n) => { const r = await fetch('dos/' + n); if (!r.ok) throw new Error(`dos/${n}: ${r.status}`); return { path: n, contents: new Uint8Array(await r.arrayBuffer()) }; };
+    dosFiles = await Promise.all(['STARSTER.EXE', 'FIELD94.DAT', 'README.TXT'].map(get));
+    return dosFiles;
+  }
+  async function boot(extra = null) {
+    if (booting) return;
+    booting = true;
+    try {
+      if (ci) {                                 // the old session goes (its exit can hang: don't wait long)
+        const old = ci; ci = null; image = null;
+        await Promise.race([old.exit().catch(() => {}), new Promise((r) => setTimeout(r, 1500))]);
+      }
+      $('start').hidden = true; $('led').classList.add('on'); $('what').textContent = 'booting…';
+      // copies: emulators transfers the buffers to its worker, which detaches them — a cached one is empty next boot
+      const fs = (await files()).map((f) => ({ path: f.path, contents: f.contents.slice() }));
+      let run = 'STARSTER FIELD94.DAT /KAMB';
+      if (extra) { fs.push({ path: 'FIELD.DAT', contents: extra }); run = 'STARSTER FIELD.DAT /KAMB'; }
+      const conf = `[sdl]\nautolock=false\n[cpu]\ncore=auto\ncycles=max\n[autoexec]\n@echo off\nmount c .\nc:\necho.\necho StarStereo 93 - STARSTER 3.0 on drive C:\necho.\n${run}\n`;
+      ci = await emulators.dosboxWorker([...fs, { dosboxConf: conf, jsdosConf: { version: '8' } }]);
+      ci.mute();
+      ci.events().onFrameSize((w, h) => { cv.width = w; cv.height = h; image = ctx.createImageData(w, h); $('what').textContent = `${w}×${h}`; });
+      ci.events().onFrame((rgb, rgba) => {
+        if (!image) { cv.width = ci.width(); cv.height = ci.height(); image = ctx.createImageData(cv.width, cv.height); }
+        const d = image.data;
+        if (rgba) d.set(rgba.subarray(0, d.length));
+        else if (rgb) for (let i = 0, j = 0; j < d.length; i += 3, j += 4) { d[j] = rgb[i]; d[j + 1] = rgb[i + 1]; d[j + 2] = rgb[i + 2]; d[j + 3] = 255; }
+        ctx.putImageData(image, 0, 0);
+      });
+      ci.events().onExit(() => { $('led').classList.remove('on'); $('what').textContent = 'off'; });
+      cv.focus();
+      status(extra ? 'your file is C:\\FIELD.DAT' : 'F1 for help; F10 quits to the DOS prompt, where STARSTER /X FIELD94.DAT starts it in Mode X');
+    } catch (e) {
+      status('could not start DOSBox: ' + (e.message || e));
+      $('start').hidden = false; $('led').classList.remove('on'); $('what').textContent = 'off';
+    } finally { booting = false; }
+  }
+  $('start').onclick = () => boot();
+  cv.addEventListener('pointerdown', () => cv.focus());
+
+  // drop a CSV: it becomes C:\FIELD.DAT (DOS line ends), and STARSTER opens it
+  screen.addEventListener('dragover', (e) => { e.preventDefault(); screen.classList.add('drop'); });
+  screen.addEventListener('dragleave', () => screen.classList.remove('drop'));
+  screen.addEventListener('drop', async (e) => {
+    e.preventDefault(); screen.classList.remove('drop');
+    const f = e.dataTransfer.files[0]; if (!f) return;
+    if (f.size > 8e6) { status('that file is bigger than a field season (8 MB) — STARSTER would take a while'); return; }
+    const text = (await f.text()).replace(/\r?\n/g, '\r\n');
+    status(`${f.name} → C:\\FIELD.DAT`);
+    boot(new TextEncoder().encode(text));
+  });
+  window.__starster = { get ci() { return ci; }, boot };
+})();
+</script>
+</body>
+</html>
