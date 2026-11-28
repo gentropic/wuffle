@@ -32,6 +32,9 @@ jobs:
           node publish.mjs
           mkdir -p _site
           cp index.html manifest.webmanifest sw.js icon.svg .nojekyll _site/
+          # STARSTER 93, wuffle's imagined 1993 ancestor, in DOSBox at /wuffle/1993/ — assembled by auditable's
+          # tools/starster/web/publish.mjs (the page, dos/STARSTER.EXE + sample + README.TXT, emulators/ pinned)
+          cp -r 1993 _site/
 
       # The manual (the LuaLaTeX book, ~6 MB) is built on Arthur's machine and attached to an auditable
       # release by hand, so it rides in from the newest release that carries one — never committed here
