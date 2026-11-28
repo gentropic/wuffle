@@ -1,0 +1,2 @@
+# a DOS disk keeps its CRLF line ends: bytes as they are, never normalised
+1993/dos/** -text
